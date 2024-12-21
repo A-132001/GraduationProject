@@ -1,11 +1,13 @@
 from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
+from pages.models import UserKind
 # from .models import UserProfile
 import re
 from django.contrib import auth
 # from products.models import Product
 def signin(request):
+    context = None
     if request.method == "POST" and 'btnsignin' in request.POST:
         username = request.POST['UserName']
         password = request.POST['Password']
@@ -14,16 +16,28 @@ def signin(request):
             if 'RememberMe' not in request.POST:
                 request.session.set_expiry(0)
             auth.login(request,user)
+            # get user kind student or doctor
+            user_kind = UserKind.objects.get(user=request.user)
+            userkind = user_kind.is_student
+            context = {
+                "user_kind":userkind
+            }
         else:
             messages.error(request,'Username or password not vaild')
-
-        
-    return render(request,'accounts/signin.html')
+    
+    return render(request,'accounts/signin.html',context)
+    
 
 def logout(request):
     auth.logout(request)
     return redirect('signin')
-    
+
+def test(request):
+    return render(request,'accounts/test.html')
+
+def doctorpage(request):
+    return  render(request,'doctorpage.html')
+
     
 # def signup(request):
 #     if request.method == "POST" and 'btnsignup' in request.POST:
